@@ -228,6 +228,153 @@ canvas {
   padding: 16px;
   justify-content: space-between;
 }
+/* ============================================================
+   LOBBY NAVIGATION TABS & SERVICE SCOREBOARD
+============================================================ */
+.lobby-tab-bar {
+  display: flex;
+  gap: 8px;
+  margin: 12px 0 6px;
+  width: 100%;
+  max-width: 980px;
+}
+.lobby-nav-tab {
+  background: rgba(0, 30, 50, 0.65);
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  color: #88ccee;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.lobby-nav-tab.active {
+  background: #00e5ff;
+  color: #001a24;
+  border-color: #00e5ff;
+  box-shadow: 0 0 14px rgba(0, 229, 255, 0.6);
+}
+.lobby-tab-panel.hidden {
+  display: none !important;
+}
+
+.scoreboard-summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  width: 100%;
+  max-width: 980px;
+  margin: 10px 0 14px;
+}
+.sc-card {
+  background: rgba(2, 18, 32, 0.85);
+  border: 1px solid rgba(0, 229, 255, 0.35);
+  border-radius: 4px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: inset 0 0 12px rgba(0, 229, 255, 0.08);
+}
+.sc-val {
+  font-size: 17px;
+  font-weight: 900;
+  color: #00ffaa;
+  letter-spacing: 0.08em;
+}
+.sc-lbl {
+  font-size: 8.5px;
+  color: #88bbdd;
+  letter-spacing: 0.14em;
+}
+
+.leaderboard-box, .recent-battles-box {
+  width: 100%;
+  max-width: 980px;
+  background: rgba(2, 14, 25, 0.88);
+  border: 1px solid rgba(0, 229, 255, 0.3);
+  border-radius: 4px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+}
+.leaderboard-title {
+  font-size: 10px;
+  font-weight: 800;
+  color: #00e5ff;
+  letter-spacing: 0.18em;
+  margin-bottom: 10px;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.2);
+  padding-bottom: 6px;
+}
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+}
+.leaderboard-table th {
+  text-align: left;
+  color: #6699bb;
+  padding: 6px 8px;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.2);
+  font-size: 9px;
+}
+.leaderboard-table td {
+  padding: 8px 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  color: #e0e0e0;
+}
+.leaderboard-table tr.highlight-player {
+  background: rgba(0, 229, 255, 0.15);
+  color: #00ffff;
+  font-weight: bold;
+}
+.recent-battles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 9.5px;
+  color: #c0d8ea;
+}
+.battle-entry {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: rgba(0, 30, 50, 0.4);
+  border-left: 3px solid #00ffaa;
+  border-radius: 2px;
+}
+.battle-entry.defeat {
+  border-left-color: #ff3344;
+}
+
+/* Drone Slam Button & View Toggle on FLIR HUD */
+.drone-action-btn-grp {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.drone-ctrl-btn {
+  background: rgba(0, 40, 70, 0.8);
+  border: 1px solid #00e5ff;
+  color: #00e5ff;
+  padding: 5px 10px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+.drone-ctrl-btn.slam-btn {
+  background: rgba(200, 30, 30, 0.85);
+  border-color: #ff3344;
+  color: #fff;
+  animation: pulseSlam 0.8s infinite alternate;
+}
+@keyframes pulseSlam { from { box-shadow: 0 0 4px #ff0000; } to { box-shadow: 0 0 16px #ff0000; } }
+
 .lobby-header {
   width: 100%;
   max-width: 980px;
@@ -1276,9 +1423,8 @@ canvas {
     <div class="net-warning-card">
       <div class="net-icon">📡</div>
       <div class="net-text">
-        <strong>HIGH-SPEED INTERNET REQUIRED // इंटरनेट सूचना</strong>
-        Carrier 3D GLB model & realistic ocean textures require a stable internet connection.
-        <br><span style="color:#ffcc66;">(GLB 3D model load hone ke liye internet speed achi honi chahiye).</span>
+        <strong>HIGH-SPEED BROADBAND CONNECTION REQUIRED</strong>
+        Streaming high-definition 3D warship models, ocean physics, and tactical simulation assets.
       </div>
     </div>
 
@@ -1320,6 +1466,16 @@ canvas {
     </div>
   </div>
 
+  <!-- Lobby Navigation Tabs -->
+  <div class="lobby-tab-bar">
+    <button class="lobby-nav-tab active" data-tab="modes">⚔️ BATTLE MODES</button>
+    <button class="lobby-nav-tab" data-tab="scoreboard">🏆 FLEET SCOREBOARD & STATS</button>
+    <button class="lobby-nav-tab" data-tab="arsenal">⚓ CARRIER ARMORY</button>
+  </div>
+
+  <!-- PANEL 1: MODES -->
+  <div id="lobby-panel-modes" class="lobby-tab-panel">
+
   <div class="lobby-modes-wrapper">
     <div class="mode-card active" data-mode="campaign">
       <div class="mode-icon">🎯</div>
@@ -1346,7 +1502,60 @@ canvas {
     </div>
   </div>
 
-  <div class="lobby-arsenal">
+  </div> <!-- End lobby-panel-modes -->
+
+  <!-- PANEL 2: SCOREBOARD & SERVICE RECORD -->
+  <div id="lobby-panel-scoreboard" class="lobby-tab-panel hidden">
+    <div class="scoreboard-summary-cards">
+      <div class="sc-card">
+        <span class="sc-val" id="sc-rank-badge">⭐ FLEET ADMIRAL</span>
+        <span class="sc-lbl">SERVICE RANK</span>
+      </div>
+      <div class="sc-card">
+        <span class="sc-val" id="sc-sunk-val">0</span>
+        <span class="sc-lbl">HOSTILE CARRIERS SUNK</span>
+      </div>
+      <div class="sc-card">
+        <span class="sc-val" id="sc-score-val">0</span>
+        <span class="sc-lbl">CAREER COMBAT POINTS</span>
+      </div>
+      <div class="sc-card">
+        <span class="sc-val" id="sc-wave-val">1</span>
+        <span class="sc-lbl">SURVIVAL WAVE RECORD</span>
+      </div>
+    </div>
+
+    <!-- Leaderboard -->
+    <div class="leaderboard-box">
+      <div class="leaderboard-title">FLEET ADMIRALTY LEADERBOARD // TOP CARRIER STRIKE COMMANDERS</div>
+      <table class="leaderboard-table">
+        <thead>
+          <tr>
+            <th>RANK</th>
+            <th>COMMANDER & CARRIER</th>
+            <th>CARRIERS SUNK</th>
+            <th>COMBAT PTS</th>
+            <th>STATUS</th>
+          </tr>
+        </thead>
+        <tbody id="leaderboard-tbody">
+          <!-- Populated by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Recent Battles Log -->
+    <div class="recent-battles-box">
+      <div class="leaderboard-title">RECENT COMBAT OPERATIONS LOG</div>
+      <div id="recent-battles-list" class="recent-battles-list">
+        <div style="color:#7799aa; font-style:italic;">No recorded operations yet. Deploy into battle to log career combat data!</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL 3: ARSENAL -->
+  <div id="lobby-panel-arsenal" class="lobby-tab-panel hidden">
+    <div class="lobby-arsenal">
     <div class="arsenal-item">
       <span class="arsenal-badge">SALVO</span>
       <span>Dual 127mm Crosshair Aim Artillery</span>
@@ -1368,6 +1577,8 @@ canvas {
       <span>Mk-48 Sub-Surface Heavy Torpedo</span>
     </div>
   </div>
+
+  </div> <!-- End lobby-panel-arsenal -->
 
   <div class="lobby-bottom">
     <button class="deploy-btn" id="btn-deploy-combat">
@@ -1579,7 +1790,11 @@ canvas {
         <span class="drone-telemetry-item">ALT: <b id="drone-alt-val">2100</b> M</span>
         <span class="drone-telemetry-item">SPD: <b id="drone-spd-val">240</b> KTS</span>
         <span class="drone-telemetry-item">BATTERY: <b id="drone-batt-val">100%</b></span>
-        <button id="btn-drone-abort" class="drone-abort-btn">✕ ABORT STRIKE</button>
+        <div class="drone-action-btn-grp" style="margin-top:4px;">
+          <button id="btn-drone-view-toggle" class="drone-ctrl-btn">📷 TOP-DOWN (85°)</button>
+          <button id="btn-drone-slam" class="drone-ctrl-btn slam-btn">⚡ DIVE SLAM</button>
+          <button id="btn-drone-abort" class="drone-abort-btn" style="margin-top:0;">✕ ABORT</button>
+        </div>
       </div>
     </div>
 
@@ -1904,6 +2119,108 @@ const sfx = new SoundEngine();
 /* ============================================================
    2. GAME STATE & SETUP
 ============================================================ */
+/* ============================================================
+   SCOREBOARD & COMBAT SERVICE RECORD MANAGER
+============================================================ */
+const Scoreboard = {
+  getStats() {
+    try {
+      const data = localStorage.getItem('warship_stats');
+      if (data) return JSON.parse(data);
+    } catch(e) {}
+    return {
+      totalSunk: 0,
+      totalDamage: 0,
+      highestWave: 1,
+      campaignCleared: 0,
+      battlesPlayed: 0,
+      highScore: 0,
+      recentBattles: []
+    };
+  },
+  saveStats(stats) {
+    try {
+      localStorage.setItem('warship_stats', JSON.stringify(stats));
+    } catch(e) {}
+  },
+  recordSink(isBoss = false) {
+    const s = this.getStats();
+    s.totalSunk++;
+    s.totalDamage += (isBoss ? 35 : 10);
+    s.highScore += (isBoss ? 3500 : 1200);
+    this.saveStats(s);
+    this.render();
+  },
+  recordBattle(mode, victory, score, wave = 1) {
+    const s = this.getStats();
+    s.battlesPlayed++;
+    if (score > s.highScore) s.highScore = score;
+    if (wave > s.highestWave) s.highestWave = wave;
+    if (victory && mode === 'campaign') s.campaignCleared++;
+    s.recentBattles.unshift({
+      date: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      mode: mode.toUpperCase(),
+      victory,
+      score,
+      sunk: s.totalSunk
+    });
+    if (s.recentBattles.length > 6) s.recentBattles.pop();
+    this.saveStats(s);
+    this.render();
+  },
+  getRank(score) {
+    if (score > 35000) return '⭐ FLEET ADMIRAL (O-10)';
+    if (score > 22000) return 'VICE ADMIRAL (O-9)';
+    if (score > 14000) return 'REAR ADMIRAL (O-8)';
+    if (score > 7000)  return 'CAPTAIN (O-6)';
+    if (score > 3000)  return 'COMMANDER (O-5)';
+    return 'LIEUTENANT COMMANDER (O-4)';
+  },
+  render() {
+    const s = this.getStats();
+    const rankEl = document.getElementById('sc-rank-badge');
+    const sunkEl = document.getElementById('sc-sunk-val');
+    const scoreEl = document.getElementById('sc-score-val');
+    const waveEl = document.getElementById('sc-wave-val');
+    if (rankEl) rankEl.textContent = this.getRank(s.highScore);
+    if (sunkEl) sunkEl.textContent = s.totalSunk;
+    if (scoreEl) scoreEl.textContent = `${s.highScore.toLocaleString()} PTS`;
+    if (waveEl) waveEl.textContent = `WAVE ${s.highestWave}`;
+
+    const tbody = document.getElementById('leaderboard-tbody');
+    if (tbody) {
+      const topFleet = [
+        { name: 'ADM. WILLIAM HALSEY', ship: 'USS ENTERPRISE (CV-6)', sunk: 48, pts: 62400, status: 'PACIFIC THEATER' },
+        { name: 'YOU (COMMANDER)', ship: 'USS EISENHOWER (CVN-69)', sunk: s.totalSunk, pts: s.highScore, status: 'ACTIVE COMBAT', isPlayer: true },
+        { name: 'ADM. CHESTER NIMITZ', ship: 'USS NIMITZ (CVN-68)', sunk: 36, pts: 44200, status: 'CARRIER STRIKE GRP' },
+        { name: 'ADM. RAYMOND SPRUANCE', ship: 'USS HORNET (CV-8)', sunk: 29, pts: 35100, status: 'MIDWAY PATROL' },
+        { name: 'CAPT. JOHN MCCLUSKY', ship: 'USS YORKTOWN (CV-5)', sunk: 18, pts: 21800, status: 'TASK FORCE 17' }
+      ].sort((a, b) => b.pts - a.pts);
+
+      tbody.innerHTML = topFleet.map((row, idx) => `
+        <tr class="${row.isPlayer ? 'highlight-player' : ''}">
+          <td>#${idx + 1}</td>
+          <td><b>${row.name}</b><br><span style="font-size:8px; color:#88aacc;">${row.ship}</span></td>
+          <td>${row.sunk}</td>
+          <td><b>${row.pts.toLocaleString()}</b></td>
+          <td><span style="color:${row.isPlayer ? '#00ffaa' : '#66aacc'}; font-size:8.5px;">● ${row.status}</span></td>
+        </tr>
+      `).join('');
+    }
+
+    const logList = document.getElementById('recent-battles-list');
+    if (logList && s.recentBattles.length > 0) {
+      logList.innerHTML = s.recentBattles.map(b => `
+        <div class="battle-entry ${b.victory ? 'victory' : 'defeat'}">
+          <span><b>${b.mode} OPERATION</b> · ${b.date}</span>
+          <span>${b.victory ? '🏆 VICTORY' : '⚓ MISSION END'}</span>
+          <span>SCORE: <b>${b.score}</b> PTS</span>
+        </div>
+      `).join('');
+    }
+  }
+};
+
 const STATE = {
   LOADING: 'loading',
   LOBBY:   'lobby',
@@ -2775,7 +3092,10 @@ function firePlayerMissile() {
 
 /* --- WEAPON 3: Controllable FPV Kamikaze Drone (Loitering Munition) --- */
 let isDroneFPV = false;
+let droneCamMode = 'top'; // 'top' (overhead 85° birds-eye) or 'angled' (angled 55° dive)
+let isDroneDivingFast = false;
 let fpvDroneMesh = null;
+let droneGroundRing = null;
 let fpvDroneFlight = {
   pitch: -0.32,  // Dive angle in radians
   yaw: 0,        // Heading in radians
@@ -2857,8 +3177,10 @@ function launchDroneFPV() {
   if (isDroneFPV) return;
 
   isDroneFPV = true;
+  droneCamMode = 'top';
+  isDroneDivingFast = false;
   sfx.playDroneRadioUplink();
-  showToast("🛰️ SATELLITE COMMAND LINK ACQUIRED — FPV LOITERING MUNITION ONLINE");
+  showToast("🛰️ SATELLITE COMMAND LINK ACQUIRED — TOP-DOWN RECON DRONE ONLINE");
 
   // Show Drone FPV Overlay
   const overlay = document.getElementById('drone-fpv-overlay');
@@ -2866,29 +3188,42 @@ function launchDroneFPV() {
 
   // Apply Black & White / FLIR Thermal filter to 3D renderer canvas
   if (renderer && renderer.domElement) {
-    renderer.domElement.style.filter = 'grayscale(100%) contrast(175%) brightness(1.15)';
+    renderer.domElement.style.filter = 'grayscale(100%) contrast(180%) brightness(1.15)';
   }
 
   // Create FPV Drone 3D Mesh in the sky
   fpvDroneMesh = createFPVDroneMesh();
 
-  // Position high in clouds, aligned with carrier heading and angled towards target fleet
-  const carrierHeading = carrierShip.rotation.y;
-  const forwardOffset = 500;
-  fpvDroneMesh.position.set(
-    carrierShip.position.x - Math.sin(carrierHeading) * forwardOffset,
-    2100, // High sky altitude
-    carrierShip.position.z - Math.cos(carrierHeading) * forwardOffset
-  );
+  // Position high in sky looking directly down on the combat theater
+  let spawnX = carrierShip.position.x;
+  let spawnZ = carrierShip.position.z - 800;
 
-  fpvDroneFlight.altitude = 2100;
-  fpvDroneFlight.pitch = -0.32; // -18 degrees descent
-  fpvDroneFlight.yaw = carrierHeading;
+  if (selectedTargetEnemy && !selectedTargetEnemy.userData.isSinking) {
+    spawnX = selectedTargetEnemy.position.x + (Math.random() - 0.5) * 350;
+    spawnZ = selectedTargetEnemy.position.z + 550;
+  }
+
+  fpvDroneMesh.position.set(spawnX, 2000, spawnZ);
+
+  fpvDroneFlight.altitude = 2000;
+  fpvDroneFlight.pitch = -Math.PI / 2.12; // Steep Top-Down 85° angle looking down!
+  fpvDroneFlight.yaw = 0;
   fpvDroneFlight.roll = 0;
-  fpvDroneFlight.speed = 76;
+  fpvDroneFlight.speed = 48;
   fpvDroneFlight.battery = 100;
 
   scene.add(fpvDroneMesh);
+
+  // Ground Impact Target Ring on Water Surface
+  if (!droneGroundRing) {
+    droneGroundRing = new THREE.Mesh(
+      new THREE.RingGeometry(35, 45, 32),
+      new THREE.MeshBasicMaterial({ color: 0xff3344, side: THREE.DoubleSide, transparent: true, opacity: 0.85 })
+    );
+    droneGroundRing.rotation.x = -Math.PI / 2;
+  }
+  droneGroundRing.position.set(spawnX, 3, spawnZ);
+  scene.add(droneGroundRing);
 }
 
 function exitDroneFPV(crashed = false, hitEnemy = false) {
@@ -2923,6 +3258,9 @@ function cleanupDroneFPV() {
   if (fpvDroneMesh) {
     scene.remove(fpvDroneMesh);
     fpvDroneMesh = null;
+  }
+  if (droneGroundRing) {
+    scene.remove(droneGroundRing);
   }
 
   // Start Drone cooldown
@@ -3253,6 +3591,7 @@ function destroyEnemy(enemy, idx) {
   enemy.userData.isSinking = true;
   spawnExplosion(enemy.position.clone(), 3.8, 0xff5500);
   sfx.playExplosion(true);
+  Scoreboard.recordSink(enemy.userData.type === 'boss');
   showToast("💥 HOSTILE CARRIER SUNK");
 
   if (selectedMode === GAME_MODES.CAMPAIGN) {
@@ -3407,6 +3746,7 @@ function checkNavObjective(dt) {
 }
 
 function onMissionComplete(subText = "") {
+  Scoreboard.recordBattle(selectedMode, true, 5000 + playerHP * 50, survivalWave);
   setGameState(STATE.VICTORY);
   document.getElementById('victory-sub').textContent = subText;
   document.getElementById('victory-stats').innerHTML =
@@ -3416,6 +3756,7 @@ function onMissionComplete(subText = "") {
 }
 
 function onGameOver() {
+  Scoreboard.recordBattle(selectedMode, false, survivalScore, survivalWave);
   setGameState(STATE.GAMEOVER);
   sfx.playExplosion(true);
   spawnExplosion(carrierShip.position.clone(), 4.2, 0xff2200);
@@ -3584,37 +3925,60 @@ function updateFloatingHealthBars() {
   });
 }
 
-// Center Crosshair Aiming Logic
+// Dynamic Enemy Target Tracking Crosshair
 function updateCrosshairAim() {
   const ch = document.getElementById('combat-crosshair');
   const chTag = document.getElementById('crosshair-target-tag');
   const distReadout = document.getElementById('ch-dist-readout');
   if (!ch || gameState !== STATE.PLAYING) return;
 
-  raycaster.setFromCamera(new THREE.Vector2(0, 0), camera);
-  const hits = raycaster.intersectObjects(enemies, true);
-
-  if (hits.length > 0) {
-    let topGroup = hits[0].object;
-    while (topGroup.parent && !enemies.includes(topGroup)) {
-      topGroup = topGroup.parent;
-    }
-    if (enemies.includes(topGroup) && !topGroup.userData.isSinking) {
-      if (!ch.classList.contains('locked')) {
-        sfx.playLockTone();
+  // Auto-target nearest living enemy carrier if none selected or current is sinking
+  const liveEnemies = enemies.filter(e => !e.userData.isSinking);
+  if (liveEnemies.length > 0 && (!selectedTargetEnemy || selectedTargetEnemy.userData.isSinking)) {
+    let minDist = Infinity;
+    let closest = liveEnemies[0];
+    liveEnemies.forEach(e => {
+      const d = carrierShip.position.distanceTo(e.position);
+      if (d < minDist) {
+        minDist = d;
+        closest = e;
       }
-      crosshairAimedEnemy = topGroup;
-      selectedTargetEnemy = topGroup; // Auto-lock target in crosshair!
+    });
+    selectedTargetEnemy = closest;
+  }
+
+  if (selectedTargetEnemy && !selectedTargetEnemy.userData.isSinking) {
+    crosshairAimedEnemy = selectedTargetEnemy;
+    // 3D position directly above target enemy ship deck & superstructure
+    const target3D = selectedTargetEnemy.position.clone().add(new THREE.Vector3(0, 36, 0));
+    const p = target3D.clone().project(camera);
+
+    // If target is in front of the camera
+    if (p.z < 1) {
+      const halfW = window.innerWidth / 2;
+      const halfH = window.innerHeight / 2;
+      const targetX = (p.x * halfW) + halfW;
+      const targetY = -(p.y * halfH) + halfH;
+
+      // Position crosshair directly ON the enemy ship in 3D perspective!
+      ch.style.left = `${targetX}px`;
+      ch.style.top = `${targetY}px`;
+      ch.style.transform = 'translate(-50%, -50%)';
       ch.classList.add('locked');
-      const idx = enemies.indexOf(topGroup) + 1;
-      const d = Math.round(carrierShip.position.distanceTo(topGroup.position));
-      if (chTag) chTag.textContent = `[ LOCK: CARRIER #${idx} ]`;
+
+      const idx = enemies.indexOf(selectedTargetEnemy) + 1;
+      const d = Math.round(carrierShip.position.distanceTo(selectedTargetEnemy.position));
+      if (chTag) chTag.textContent = `[ LOCK: HOSTILE CVN #${idx} ]`;
       if (distReadout) distReadout.textContent = `${d} M`;
       return;
     }
   }
 
+  // Fallback: If no enemy or target behind camera
   crosshairAimedEnemy = null;
+  ch.style.left = '50%';
+  ch.style.top = '50%';
+  ch.style.transform = 'translate(-50%, -50%)';
   ch.classList.remove('locked');
   if (distReadout) distReadout.textContent = '--- M';
 }
@@ -3747,6 +4111,66 @@ function setupMobileTouch() {
    15. UI EVENT LISTENERS
 ============================================================ */
 function setupUIEvents() {
+  // Scoreboard initial render
+  Scoreboard.render();
+
+  // Lobby Navigation Tabs
+  document.querySelectorAll('.lobby-nav-tab').forEach(tab => {
+    tab.onclick = () => {
+      document.querySelectorAll('.lobby-nav-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.lobby-tab-panel').forEach(p => p.classList.add('hidden'));
+      tab.classList.add('active');
+
+      const targetId = 'lobby-panel-' + tab.getAttribute('data-tab');
+      const panel = document.getElementById(targetId);
+      if (panel) panel.classList.remove('hidden');
+
+      if (tab.getAttribute('data-tab') === 'scoreboard') {
+        Scoreboard.render();
+      }
+    };
+  });
+
+  // Drone View Toggle & Dive Slam Buttons
+  const viewToggleBtn = document.getElementById('btn-drone-view-toggle');
+  if (viewToggleBtn) {
+    viewToggleBtn.onclick = () => {
+      droneCamMode = (droneCamMode === 'top' ? 'angled' : 'top');
+      viewToggleBtn.textContent = (droneCamMode === 'top' ? '📷 TOP-DOWN (85°)' : '📷 ANGLED (60°)');
+      showToast(droneCamMode === 'top' ? '📷 CAMERA: TOP-DOWN VIEW' : '📷 CAMERA: ANGLED STRIKE VIEW');
+    };
+  }
+
+  const slamBtn = document.getElementById('btn-drone-slam');
+  if (slamBtn) {
+    const startSlam = () => { isDroneDivingFast = true; sfx.playDroneScreech(); };
+    const stopSlam = () => { isDroneDivingFast = false; };
+    slamBtn.addEventListener('mousedown', startSlam);
+    window.addEventListener('mouseup', stopSlam);
+    slamBtn.addEventListener('touchstart', e => { e.preventDefault(); startSlam(); }, { passive: false });
+    window.addEventListener('touchend', stopSlam);
+    window.addEventListener('touchcancel', stopSlam);
+  }
+
+  // Tap on enemy ship directly targets it
+  window.addEventListener('click', e => {
+    if (e.target.closest('#mobile-controls, .icon-btn, .screen-action-btn, #zoom-touch-bar, .overlay-screen, .tactical-btn, .wpn-tab, .drone-ctrl-btn')) return;
+    const mouse = new THREE.Vector2(
+      (e.clientX / window.innerWidth) * 2 - 1,
+      -(e.clientY / window.innerHeight) * 2 + 1
+    );
+    raycaster.setFromCamera(mouse, camera);
+    const hits = raycaster.intersectObjects(enemies, true);
+    if (hits.length > 0) {
+      let top = hits[0].object;
+      while (top.parent && !enemies.includes(top)) top = top.parent;
+      if (enemies.includes(top) && !top.userData.isSinking) {
+        selectedTargetEnemy = top;
+        sfx.playLockTone();
+        showToast(`🎯 TARGET LOCKED: HOSTILE CARRIER #${enemies.indexOf(top) + 1}`);
+      }
+    }
+  });
   document.querySelectorAll('.mode-card').forEach(card => {
     card.onclick = () => {
       document.querySelectorAll('.mode-card').forEach(c => c.classList.remove('active'));
@@ -3936,6 +4360,9 @@ function setGameState(s) {
     cleanupDroneFPV();
   }
   gameState = s;
+  if (s === STATE.LOBBY) {
+    Scoreboard.render();
+  }
   ['loading-screen', 'lobby-screen', 'pause-screen', 'gameover-screen', 'victory-screen'].forEach(id => {
     document.getElementById(id).classList.add('hidden');
   });
@@ -4010,94 +4437,84 @@ function animate() {
     playerTurretMesh.rotation.y = Math.sin(t * 0.2) * 0.06;
   }
 
-  // --- FPV LOITERING KAMIKAZE DRONE SIMULATION ---
+  // --- TOP-DOWN RECON & KAMIKAZE DRONE SIMULATION ---
   if (isDroneFPV && fpvDroneMesh) {
     if (fpvDroneMesh.userData.prop) {
-      fpvDroneMesh.userData.prop.rotation.z += 0.95;
+      fpvDroneMesh.userData.prop.rotation.z += 1.2;
     }
 
-    // Steering from controls
-    fpvDroneFlight.yaw += rudderAngle * 0.038;
-
-    if (targetSpeed > 0) {
-      fpvDroneFlight.pitch = Math.max(-1.18, fpvDroneFlight.pitch - 0.022); // Steep dive
-    } else if (targetSpeed < 0) {
-      fpvDroneFlight.pitch = Math.min(-0.06, fpvDroneFlight.pitch + 0.022); // Shallow glide
+    // Smooth horizontal navigation across ocean battlefield
+    const horizSpeed = isDroneDivingFast ? 62 : 44;
+    // Rudder / Joystick X moves West/East
+    fpvDroneMesh.position.x += rudderAngle * horizSpeed * 0.72;
+    // TargetSpeed / Joystick Y moves North/South
+    if (Math.abs(targetSpeed) > 0.05) {
+      fpvDroneMesh.position.z -= (targetSpeed / 0.65) * horizSpeed * 0.72;
     }
 
-    const targetRoll = -rudderAngle * 0.48;
-    fpvDroneFlight.roll += (targetRoll - fpvDroneFlight.roll) * 0.12;
+    // Continuous smooth descent with dive slam support
+    const descentRate = isDroneDivingFast ? 38 : 12;
+    fpvDroneMesh.position.y -= descentRate;
 
-    const curSpeed = (targetSpeed > 0 ? 96 : 74);
-    const vx = -Math.sin(fpvDroneFlight.yaw) * Math.cos(fpvDroneFlight.pitch) * curSpeed;
-    const vy = Math.sin(fpvDroneFlight.pitch) * curSpeed;
-    const vz = -Math.cos(fpvDroneFlight.yaw) * Math.cos(fpvDroneFlight.pitch) * curSpeed;
-
-    fpvDroneMesh.position.x += vx;
-    fpvDroneMesh.position.y += vy;
-    fpvDroneMesh.position.z += vz;
-
-    fpvDroneMesh.rotation.order = 'YXZ';
-    fpvDroneMesh.rotation.y = fpvDroneFlight.yaw;
-    fpvDroneMesh.rotation.x = fpvDroneFlight.pitch;
-    fpvDroneMesh.rotation.z = fpvDroneFlight.roll;
-
-    // Attach camera to drone nose looking forward
-    camera.position.copy(fpvDroneMesh.position).add(new THREE.Vector3(0, 1.2, 0));
+    // Top-Down Camera placement looking directly down at the ocean
+    camera.position.set(fpvDroneMesh.position.x, fpvDroneMesh.position.y, fpvDroneMesh.position.z);
     camera.rotation.order = 'YXZ';
-    camera.rotation.y = fpvDroneFlight.yaw;
-    camera.rotation.x = fpvDroneFlight.pitch;
-    camera.rotation.z = fpvDroneFlight.roll;
+    if (droneCamMode === 'top') {
+      camera.rotation.set(-Math.PI / 2.12, 0, 0); // ~85° steep top-down view!
+    } else {
+      camera.rotation.set(-Math.PI / 3.2, 0, 0);  // ~56° angled attack view
+    }
+
+    // Ground target ring follows drone X/Z on water surface
+    if (droneGroundRing) {
+      droneGroundRing.position.set(fpvDroneMesh.position.x, 3, fpvDroneMesh.position.z);
+      droneGroundRing.rotation.z += 0.04;
+    }
 
     // Telemetry updates
     const alt = Math.max(0, Math.round(fpvDroneMesh.position.y));
-    const spd = Math.round(curSpeed * 3.1);
+    const spd = Math.round((isDroneDivingFast ? 320 : 180));
     const altEl = document.getElementById('drone-alt-val');
     const spdEl = document.getElementById('drone-spd-val');
     const battEl = document.getElementById('drone-batt-val');
     if (altEl) altEl.textContent = alt;
     if (spdEl) spdEl.textContent = spd;
-    fpvDroneFlight.battery = Math.max(0, fpvDroneFlight.battery - 0.09);
+    fpvDroneFlight.battery = Math.max(0, fpvDroneFlight.battery - 0.08);
     if (battEl) battEl.textContent = `${Math.round(fpvDroneFlight.battery)}%`;
 
     // 3D-to-2D Projected Targets on Drone FLIR Screen
     updateDroneTargetOverlays();
 
-    // Drone vapor trails
-    if (Math.random() < 0.65) {
-      spawnSmokePuff(fpvDroneMesh.position.clone().add(new THREE.Vector3(0, 0, 10)), 0.7);
-    }
-
-    // Direct collision with enemy ships
+    // Check collision against all enemy warships
     let hitEnemyShip = null;
-    for (let e of enemies) {
-      if (e.userData.isSinking) continue;
-      const d = fpvDroneMesh.position.distanceTo(e.position);
-      if (d < 280 || (Math.abs(fpvDroneMesh.position.x - e.position.x) < 130 &&
-                      Math.abs(fpvDroneMesh.position.z - e.position.z) < 440 &&
-                      fpvDroneMesh.position.y < 75)) {
-        hitEnemyShip = e;
-        break;
+    if (fpvDroneMesh.position.y <= 75) {
+      for (let e of enemies) {
+        if (e.userData.isSinking) continue;
+        const dist2D = Math.hypot(fpvDroneMesh.position.x - e.position.x, fpvDroneMesh.position.z - e.position.z);
+        if (dist2D < 240) {
+          hitEnemyShip = e;
+          break;
+        }
       }
     }
 
     if (hitEnemyShip) {
-      spawnExplosion(fpvDroneMesh.position.clone(), 5.5, 0xff2200);
+      spawnExplosion(fpvDroneMesh.position.clone(), 5.8, 0xff2200);
       sfx.playExplosion(true);
       triggerHitmarker();
       if (navigator.vibrate) navigator.vibrate([160, 60, 180]);
 
-      hitEnemyShip.userData.hp -= 12; // Devastating kamikaze impact!
+      hitEnemyShip.userData.hp -= 12; // Massive top-down kamikaze damage!
       if (hitEnemyShip.userData.hp <= 0) {
         destroyEnemy(hitEnemyShip, enemies.indexOf(hitEnemyShip));
       }
-      showToast("💥 KAMIKAZE DIRECT IMPACT ON HOSTILE WARSHIP!");
+      showToast("💥 DIRECT TOP-DOWN CRASH! ENEMY CARRIER CRIPPLED!");
       exitDroneFPV(true, true);
     } else if (fpvDroneMesh.position.y <= 12) {
       spawnWaterSplash(fpvDroneMesh.position.clone());
       spawnExplosion(fpvDroneMesh.position.clone(), 3.5, 0xffaa00);
       sfx.playExplosion(false);
-      showToast("⚠️ LOITERING MUNITION IMPACTED WATER SURFACE");
+      showToast("⚠️ DRONE CRASHED INTO OCEAN");
       exitDroneFPV(true, false);
     } else if (fpvDroneFlight.battery <= 0) {
       spawnExplosion(fpvDroneMesh.position.clone(), 3.0, 0xff7700);
