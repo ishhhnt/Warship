@@ -48,6 +48,30 @@ canvas {
   pointer-events: none;
   z-index: 11;
 }
+#night-vision-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at center, rgba(0, 45, 10, 0.04), rgba(0, 12, 3, 0.32)),
+    repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(30, 255, 100, 0.025) 4px);
+  mix-blend-mode: screen;
+  pointer-events: none;
+  z-index: 12;
+}
+.night-vision-active #night-vision-overlay { display: block; }
+.night-vision-active #hud {
+  filter: grayscale(1) contrast(1.22) brightness(1.12) sepia(0.08) hue-rotate(175deg) saturate(0.42);
+}
+.night-vision-active #night-vision-overlay {
+  background:
+    radial-gradient(ellipse at center, rgba(220, 236, 255, 0.02), rgba(90, 130, 170, 0.12)),
+    repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(225, 238, 255, 0.018) 4px);
+  mix-blend-mode: screen;
+}
+.night-vision-active #damage-flash-fx.active {
+  background: rgba(210, 230, 255, 0.2);
+}
 
 /* ============================================================
    TACTICAL SCREENS & CARDS
@@ -1058,10 +1082,12 @@ canvas {
   pointer-events: auto;
   cursor: pointer;
   transition: border-color 0.15s, box-shadow 0.15s;
+  z-index: 1;
 }
 .enemy-hp-plate.targeted {
   border-color: #00ffaa;
   box-shadow: 0 0 14px rgba(0, 255, 170, 0.6);
+  z-index: 2;
 }
 .enemy-hp-title {
   display: flex;
@@ -1094,12 +1120,13 @@ canvas {
 .radar-box {
   pointer-events: auto;
   position: absolute;
-  bottom: 125px;
+  top: 82px;
   left: 14px;
   cursor: pointer;
+  z-index: 61;
 }
 #radar-canvas {
-  width: 110px; height: 110px;
+  width: 132px; height: 132px;
   border-radius: 50%;
   border: 2px solid rgba(0, 255, 100, 0.85);
   box-shadow: 0 0 16px rgba(0, 255, 100, 0.35), inset 0 0 18px rgba(0, 20, 10, 0.95);
@@ -1467,6 +1494,14 @@ canvas {
     gap: 8px;
     margin: 0;
   }
+  .battle-settings {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 8px;
+  }
+  .battle-setting { min-width: 0; }
+  .battle-setting select { min-height: 44px; }
   .mode-card { padding: 10px; }
   .mode-card.active::before { font-size: 6px; top: 4px; right: 4px; }
   .mode-icon { font-size: 20px; margin-bottom: 4px; }
@@ -1504,7 +1539,8 @@ canvas {
   .mission-objective { font-size: 8px; white-space: normal; line-height: 1.25; }
   .hp-hud-wrap { width: clamp(76px, 24vw, 112px); }
   .hp-label { font-size: 7px; letter-spacing: 0; }
-  #btn-quick-pause { min-height: 44px; padding: 5px 8px !important; font-size: 9px !important; }
+  .hud-quick-actions { grid-template-columns: repeat(3, 42px); gap: 3px; }
+  .hud-action-btn { min-width: 42px; min-height: 44px; padding: 3px; font-size: 7px; }
   #target-lock-box {
     top: 58px;
     max-width: calc(100% - 16px);
@@ -1551,8 +1587,8 @@ canvas {
   .tactical-btn.btn-gun { width: 52px; height: 52px; }
   #zoom-touch-bar { right: 5px; gap: 2px; }
   #zoom-range-input { width: 32px; height: 112px; }
-  .radar-box { bottom: calc(98px + env(safe-area-inset-bottom)); left: 8px; }
-  #radar-canvas { width: 60px; height: 60px; }
+  .radar-box { top: 76px; left: 7px; }
+  #radar-canvas { width: 78px; height: 78px; }
   .radar-tag { font-size: 6px; margin-top: 1px; }
   .combat-toast { top: 62px; max-width: calc(100% - 24px); font-size: 9px; text-align: center; }
   .screen-action-btn { min-height: 44px; min-width: 0; width: 100%; margin: 4px 0; padding: 10px; font-size: 11px; }
@@ -1577,8 +1613,8 @@ canvas {
     gap: 4px;
   }
   .weapon-selector-hud { justify-self: center; }
-  .radar-box { bottom: calc(90px + env(safe-area-inset-bottom)); }
-  #radar-canvas { width: 52px; height: 52px; }
+  .radar-box { top: 60px; left: 7px; }
+  #radar-canvas { width: 64px; height: 64px; }
 }
 
 @media (max-width: 380px) and (orientation: portrait) {
@@ -1588,6 +1624,268 @@ canvas {
   .tactical-btn.btn-gun { width: 50px; height: 50px; }
   .wpn-tab { padding: 7px 4px; font-size: 7px; }
 }
+
+/* ============================================================
+   RESPONSIVE MOBILE ERGONOMICS & CONTROLS OVERHAUL
+============================================================ */
+#mobile-controls {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 70;
+}
+
+.helm-control-grp {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  z-index: 75;
+}
+
+.weapons-trigger-grp {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  pointer-events: auto;
+  display: grid;
+  grid-template-columns: 50px 50px;
+  grid-gap: 6px;
+  align-items: flex-end;
+  z-index: 75;
+}
+
+.tactical-btn {
+  width: 50px; height: 50px;
+  font-size: 7.5px;
+}
+.tactical-btn.btn-gun {
+  grid-column: span 2;
+  width: 100%;
+  height: 52px;
+  border-radius: 26px;
+  background: linear-gradient(135deg, rgba(70, 35, 0, 0.95) 0%, rgba(130, 65, 0, 0.95) 100%);
+  border: 2px solid #ffaa00;
+  color: #ffdd44;
+  box-shadow: 0 0 16px rgba(255, 170, 0, 0.45);
+}
+
+/* Base Lobby Scrolling & Sticky Play Button */
+#lobby-screen {
+  justify-content: flex-start !important;
+  padding: 16px 18px 100px !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+}
+
+.lobby-bottom {
+  position: fixed !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  padding: 12px 18px max(12px, env(safe-area-inset-bottom)) !important;
+  background: linear-gradient(0deg, rgba(2, 9, 18, 0.98) 75%, transparent) !important;
+  backdrop-filter: blur(8px) !important;
+  z-index: 180 !important;
+  display: flex !important;
+  justify-content: center !important;
+  margin-top: 0 !important;
+}
+
+.deploy-btn {
+  width: 100% !important;
+  max-width: 440px !important;
+  padding: 14px 24px !important;
+  font-size: 15px !important;
+  font-weight: 900 !important;
+  letter-spacing: 0.18em !important;
+  box-shadow: 0 0 20px rgba(0, 229, 255, 0.5) !important;
+  animation: pulseDeploy 1.5s infinite alternate !important;
+}
+@keyframes pulseDeploy {
+  from { box-shadow: 0 0 14px rgba(0, 229, 255, 0.4); transform: scale(0.995); }
+  to { box-shadow: 0 0 28px rgba(0, 255, 170, 0.7); transform: scale(1.005); }
+}
+
+/* --- MOBILE SPECIFIC (< 768px and Portrait Phones) --- */
+@media (max-width: 768px) {
+  /* 1. Radar Mini-Map in Top-Right corner (No Joystick overlap!) */
+  .radar-box {
+    top: 55px !important;
+    right: 12px !important;
+    bottom: auto !important;
+    left: auto !important;
+  }
+  #radar-canvas {
+    width: 78px !important;
+    height: 78px !important;
+  }
+  .radar-tag {
+    font-size: 6.5px !important;
+    margin-top: 1px !important;
+  }
+
+  /* 2. Helmsman Joystick on Mobile */
+  .helm-control-grp {
+    bottom: 12px !important;
+    left: 10px !important;
+  }
+  .helm-buttons {
+    display: none !important; /* Hide redundant text pills on mobile */
+  }
+  .joystick-zone {
+    width: 96px !important;
+    height: 96px !important;
+  }
+  .joystick-knob {
+    width: 38px !important;
+    height: 38px !important;
+  }
+
+  /* 3. Hide center bottom selector bar on mobile to eliminate clutter */
+  .weapon-selector-hud {
+    display: none !important;
+  }
+
+  /* 4. Right Thumb Combat Cluster on Mobile */
+  .weapons-trigger-grp {
+    bottom: 12px !important;
+    right: 10px !important;
+    grid-template-columns: 46px 46px !important;
+    grid-gap: 5px !important;
+  }
+  .tactical-btn {
+    width: 46px !important;
+    height: 46px !important;
+    font-size: 7px !important;
+  }
+  .tactical-btn .btn-icon {
+    font-size: 15px !important;
+    margin-bottom: 1px !important;
+  }
+  .tactical-btn.btn-gun {
+    height: 48px !important;
+    font-size: 8px !important;
+  }
+
+  /* 5. Compact Top HUD & Target Lock on Mobile */
+  .hud-top-bar {
+    padding: 3px 6px !important;
+  }
+  .hud-card {
+    padding: 3px 6px !important;
+  }
+  .ship-status-hud {
+    font-size: 8px !important;
+    line-height: 1.35 !important;
+  }
+  .mission-hud-panel {
+    min-width: 110px !important;
+    max-width: 44% !important;
+  }
+  .mission-title {
+    font-size: 7px !important;
+  }
+  .mission-objective {
+    font-size: 9px !important;
+  }
+  .hp-hud-wrap {
+    width: 90px !important;
+  }
+  .hp-track {
+    height: 6px !important;
+  }
+
+  /* 6. Compact Target Lock Banner */
+  #target-lock-box {
+    top: 44px !important;
+    font-size: 7.5px !important;
+    padding: 3px 8px !important;
+    max-width: 80% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  /* 7. Slim Zoom Bar */
+  #zoom-touch-bar {
+    top: 36% !important;
+    right: 4px !important;
+    transform: translateY(-50%) scale(0.85) !important;
+  }
+
+  /* 8. Mobile Lobby Layout (Compact 2x2 Grid + Sticky Play Button) */
+  #lobby-screen {
+    padding: 10px 12px 85px !important;
+  }
+  .lobby-header {
+    padding-bottom: 4px !important;
+    gap: 4px !important;
+  }
+  .lobby-title-grp h1 {
+    font-size: 15px !important;
+  }
+  .lobby-title-grp span {
+    font-size: 7.5px !important;
+  }
+  .lobby-tools {
+    gap: 4px !important;
+  }
+  .lobby-tools .icon-btn {
+    padding: 4px 7px !important;
+    font-size: 9px !important;
+  }
+  .lobby-tab-bar {
+    gap: 5px !important;
+    margin: 5px 0 !important;
+  }
+  .lobby-nav-tab {
+    padding: 5px 8px !important;
+    font-size: 8.5px !important;
+  }
+  .lobby-modes-wrapper {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+    margin: 6px 0 !important;
+  }
+  .mode-card {
+    padding: 8px 6px !important;
+    border-radius: 4px !important;
+  }
+  .mode-icon {
+    font-size: 18px !important;
+    margin-bottom: 2px !important;
+  }
+  .mode-name {
+    font-size: 9px !important;
+    margin-bottom: 2px !important;
+  }
+  .mode-desc {
+    font-size: 7.5px !important;
+    line-height: 1.25 !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
+  }
+  .scoreboard-summary-cards {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 6px !important;
+  }
+  .sc-card {
+    padding: 8px 10px !important;
+  }
+  .sc-val {
+    font-size: 13px !important;
+  }
+  .leaderboard-box, .recent-battles-box {
+    padding: 8px 10px !important;
+  }
+}
 </style>
 </head>
 
@@ -1596,6 +1894,7 @@ canvas {
 <div id="damage-flash-fx"></div>
 <div class="screen-vignette"></div>
 <div class="screen-scanlines"></div>
+<div id="night-vision-overlay" aria-hidden="true"></div>
 
 <div id="combat-toast" class="combat-toast">SYSTEMS ONLINE</div>
 
@@ -1668,26 +1967,45 @@ canvas {
     <div class="mode-card active" data-mode="campaign">
       <div class="mode-icon">🎯</div>
       <div class="mode-name">CAMPAIGN OPERATIONS</div>
-      <div class="mode-desc">Engage hostile full-scale aircraft carriers in strategic naval warfare.</div>
+      <div class="mode-desc">Standard fleet resistance with balanced enemy armor and attack speed.</div>
     </div>
 
     <div class="mode-card" data-mode="survival">
       <div class="mode-icon">🛡️</div>
       <div class="mode-name">FLEET DEFENSE (SURVIVAL)</div>
-      <div class="mode-desc">Survive relentless waves of full-size enemy aircraft carriers!</div>
+      <div class="mode-desc">Enemy armor, accuracy, and attack speed increase with every wave.</div>
     </div>
 
     <div class="mode-card" data-mode="freeroam">
       <div class="mode-icon">🌊</div>
       <div class="mode-name">OPEN SEA PATROL</div>
-      <div class="mode-desc">Free cruise across open ocean and test aim crosshair, instant drone airstrikes & weapons.</div>
+      <div class="mode-desc">Low-threat patrol to practice steering, targeting, and weapons.</div>
     </div>
 
     <div class="mode-card" data-mode="boss">
       <div class="mode-icon">☠️</div>
       <div class="mode-name">BOSS RAID: DREADNOUGHT</div>
-      <div class="mode-desc">High stakes showdown against a colossal enemy Flagship Carrier!</div>
+      <div class="mode-desc">Face a heavily armored flagship and stronger escort carriers.</div>
     </div>
+  </div>
+
+  <div class="battle-settings">
+    <label class="battle-setting" for="difficulty-select">
+      ENEMY THREAT
+      <select id="difficulty-select">
+        <option value="normal">NORMAL</option>
+        <option value="medium">MEDIUM</option>
+        <option value="hard">HARD</option>
+        <option value="extreme">EXTREME</option>
+      </select>
+    </label>
+    <label class="battle-setting" for="graphics-select">
+      GRAPHICS QUALITY
+      <select id="graphics-select">
+        <option value="low">LOW · MOBILE</option>
+        <option value="high">HIGH · REALISTIC</option>
+      </select>
+    </label>
   </div>
 
   </div> <!-- End lobby-panel-modes -->
@@ -1700,22 +2018,26 @@ canvas {
         <span class="sc-lbl">SERVICE RANK</span>
       </div>
       <div class="sc-card">
+        <span class="sc-val" id="sc-today-sunk-val">0</span>
+        <span class="sc-lbl">CARRIERS SUNK TODAY</span>
+      </div>
+      <div class="sc-card">
+        <span class="sc-val" id="sc-battles-val">0</span>
+        <span class="sc-lbl">BATTLES PLAYED</span>
+      </div>
+      <div class="sc-card">
         <span class="sc-val" id="sc-sunk-val">0</span>
-        <span class="sc-lbl">HOSTILE CARRIERS SUNK</span>
+        <span class="sc-lbl">TOTAL CARRIERS SUNK</span>
       </div>
       <div class="sc-card">
         <span class="sc-val" id="sc-score-val">0</span>
         <span class="sc-lbl">CAREER COMBAT POINTS</span>
       </div>
-      <div class="sc-card">
-        <span class="sc-val" id="sc-wave-val">1</span>
-        <span class="sc-lbl">SURVIVAL WAVE RECORD</span>
-      </div>
     </div>
 
-    <!-- Leaderboard -->
+    <!-- Personal service record -->
     <div class="leaderboard-box">
-      <div class="leaderboard-title">FLEET ADMIRALTY LEADERBOARD // TOP CARRIER STRIKE COMMANDERS</div>
+      <div class="leaderboard-title">YOUR FLEET SERVICE RECORD</div>
       <table class="leaderboard-table">
         <thead>
           <tr>
@@ -1723,7 +2045,7 @@ canvas {
             <th>COMMANDER & CARRIER</th>
             <th>CARRIERS SUNK</th>
             <th>COMBAT PTS</th>
-            <th>STATUS</th>
+            <th>BEST WAVE</th>
           </tr>
         </thead>
         <tbody id="leaderboard-tbody">
@@ -1836,7 +2158,14 @@ canvas {
           <div id="hud-hp-bar" class="hp-fill"></div>
         </div>
       </div>
-      <button class="icon-btn" id="btn-quick-pause" style="padding:4px 8px; font-size:10px;">⏸ PAUSE</button>
+        <div class="hud-quick-actions" aria-label="Combat options">
+          <button class="hud-action-btn" id="btn-quick-exit" title="Exit to lobby" aria-label="Exit to lobby">EXIT</button>
+          <button class="hud-action-btn" id="btn-quick-reset" title="Restart this mission" aria-label="Restart mission">RESET</button>
+          <button class="hud-action-btn" id="btn-quick-pause" title="Pause combat" aria-label="Pause combat">PAUSE</button>
+          <button class="hud-action-btn" id="btn-hud-audio" title="Toggle sound" aria-label="Toggle sound">SFX</button>
+          <button class="hud-action-btn" id="btn-hud-graphics" title="Toggle graphics quality" aria-label="Toggle graphics quality">GFX</button>
+          <button class="hud-action-btn" id="btn-night-vision" title="White phosphor night vision (night only)" aria-label="Toggle white phosphor night vision">NVG</button>
+        </div>
     </div>
   </div>
 
@@ -1895,6 +2224,7 @@ canvas {
 
   <!-- Bottom Mobile Controls -->
   <div id="mobile-controls">
+    <!-- Left Thumb Zone: Helmsman Navigation Joystick -->
     <div class="helm-control-grp">
       <div class="joystick-zone" id="virtual-helm">
         <div class="joystick-labels">
@@ -1916,7 +2246,7 @@ canvas {
       </div>
     </div>
 
-    <!-- Center Weapon Select -->
+    <!-- Center Weapon Select (Desktop / Tablet view) -->
     <div class="weapon-selector-hud">
       <div class="wpn-tab active" data-wpn="gun">1: SALVO</div>
       <div class="wpn-tab" data-wpn="missile">2: VLS</div>
@@ -1925,21 +2255,9 @@ canvas {
       <div class="wpn-tab" data-wpn="torpedo">5: TORPEDO</div>
     </div>
 
-    <!-- Right Side Tactical Weapons -->
+    <!-- Right Thumb Zone: Ergonomic Combat Weapon Triggers -->
     <div class="weapons-trigger-grp">
-      <button class="tactical-btn btn-missile" id="btn-fire-missile" title="Tomahawk Cruise Missile">
-        <span class="btn-icon">🚀</span>
-        <span>MISSILE</span>
-        <div class="cd-overlay" id="cd-missile"></div>
-      </button>
-
-      <!-- Loitering Kamikaze Drone FPV Trigger -->
-      <button class="tactical-btn btn-drone" id="btn-launch-drone" title="Loitering Kamikaze Drone FPV (Steer and Crash into Target)">
-        <span class="btn-icon">🛰️</span>
-        <span id="drone-btn-text">DRONE FPV</span>
-        <div class="cd-overlay" id="cd-drone"></div>
-      </button>
-
+      <!-- Upper Tactical Row -->
       <button class="tactical-btn btn-torpedo" id="btn-fire-torpedo" title="Mk-48 Heavy Torpedo">
         <span class="btn-icon">⚡</span>
         <span>TORP</span>
@@ -1948,18 +2266,33 @@ canvas {
 
       <button class="tactical-btn btn-ciws" id="btn-toggle-ciws" title="Phalanx CIWS Rapid Defense">
         <span class="btn-icon">🛡️</span>
-        <span id="ciws-btn-text">CIWS:ON</span>
+        <span id="ciws-btn-text">CIWS</span>
       </button>
 
-      <!-- Primary Salvo Cannon (Hold for Rapid Continuous Burst - 10s Reload) -->
-      <button class="tactical-btn btn-gun" id="btn-fire-gun" title="127mm Naval Cannons (Hold for Continuous Rapid Salvo - 10s Reload)">
+      <!-- Main Strike Row -->
+      <button class="tactical-btn btn-missile" id="btn-fire-missile" title="Tomahawk Cruise Missile">
+        <span class="btn-icon">🚀</span>
+        <span>VLS</span>
+        <div class="cd-overlay" id="cd-missile"></div>
+      </button>
+
+      <button class="tactical-btn btn-drone" id="btn-launch-drone" title="Loitering Kamikaze Drone FPV (Steer and Crash into Target)">
+        <span class="btn-icon">🛰️</span>
+        <span id="drone-btn-text">DRONE</span>
+        <div class="cd-overlay" id="cd-drone"></div>
+      </button>
+
+      <!-- Primary Salvo Cannon: Prominent Bottom Button for Right Thumb -->
+      <button class="tactical-btn btn-gun" id="btn-fire-gun" title="127mm Naval Cannons (Hold for continuous salvo - 10s reload)">
         <span class="btn-icon">🎯</span>
         <span id="gun-btn-text">SALVO</span>
-        <span id="gun-ammo-text" style="font-size:7px; color:#ffdd77; font-weight:800; margin-top:1px;">24/24</span>
+        <span id="gun-ammo-text" style="font-size:7.5px; color:#ffdd77; font-weight:800; margin-top:1px;">24/24</span>
         <div class="cd-overlay" id="cd-gun"></div>
       </button>
+    </div>
+  </div>
 
-  <!-- Military Drone FPV Command Center Overlay (Black & White / FLIR) -->
+  <!-- Military Drone FPV Command Center Overlay (Direct Child of #hud) -->
   <div id="drone-fpv-overlay" class="hidden">
     <div class="drone-crt-scanlines"></div>
     
@@ -1972,7 +2305,7 @@ canvas {
       </div>
       <div class="drone-hud-col center">
         <span class="drone-target-header">⚠️ KAMIKAZE LOITERING MUNITION — TERMINAL GUIDANCE</span>
-          <span class="drone-target-sub">STEER WITH TOUCH CONTROLS TO CRASH INTO HOSTILE FLEET</span>
+        <span class="drone-target-sub">STEER WITH TOUCH CONTROLS TO CRASH INTO HOSTILE FLEET</span>
       </div>
       <div class="drone-hud-col right">
         <span class="drone-telemetry-item">ALT: <b id="drone-alt-val">2100</b> M</span>
@@ -2015,8 +2348,6 @@ canvas {
         <h2>SIGNAL TERMINATED</h2>
         <p>DIRECT WARHEAD DETONATION</p>
       </div>
-    </div>
-  </div>
     </div>
   </div>
 </div>
@@ -2461,6 +2792,10 @@ const WEAPONS = {
 let activeWeapon = 'gun';
 
 let scene, camera, renderer, water, sky, sunLight;
+let hemisphereLight = null;
+let timeOfDay = 0;
+let nightVisionEnabled = false;
+let isDroneFPV = false;
 let carrierShip = null;
 let droneOverheadMesh = null;
 let playerTurretMesh = null;
@@ -2587,11 +2922,11 @@ function spawnEnemyShip(type = 'carrier', customPos = null) {
 
   enemyShip.userData.turrets = turrets;
 
-  let hp = 10;
+  const difficulty = getEnemyDifficulty(type);
+  let hp = difficulty.hp;
   let speedMult = 0.95;
 
   if (type === 'boss') {
-    hp = 35;
     speedMult = 0.65;
     enemyShip.scale.set(2.35, 2.35, 2.35);
   }
@@ -2610,7 +2945,9 @@ function spawnEnemyShip(type = 'carrier', customPos = null) {
   enemyShip.userData.maxHp = hp;
   enemyShip.userData.speed = (0.75 + Math.random() * 0.4) * speedMult;
   enemyShip.userData.lastFire = Date.now() + 2000 + Math.random() * 2000;
-  enemyShip.userData.fireInterval = type === 'boss' ? 2400 : (3800 + Math.random() * 2000);
+  enemyShip.userData.fireInterval = difficulty.fireInterval + Math.random() * 700;
+  enemyShip.userData.attackDamage = difficulty.damage;
+  enemyShip.userData.aimSpread = difficulty.aimSpread;
   enemyShip.userData.isSinking = false;
   enemyShip.userData.sinkTime = 0;
 
@@ -2620,6 +2957,31 @@ function spawnEnemyShip(type = 'carrier', customPos = null) {
   if (!selectedTargetEnemy) {
     selectedTargetEnemy = enemyShip;
   }
+}
+
+function getEnemyDifficulty(type) {
+  const wave = selectedMode === GAME_MODES.SURVIVAL ? Math.max(1, survivalWave) : 1;
+  const difficulty = {
+    [GAME_MODES.FREEROAM]: { hp: 12, fireInterval: 6200, damage: 4, aimSpread: 0.22 },
+    [GAME_MODES.CAMPAIGN]: { hp: 18, fireInterval: 4300, damage: 7, aimSpread: 0.15 },
+    [GAME_MODES.SURVIVAL]: {
+      hp: 20 + Math.min(wave - 1, 8) * 4,
+      fireInterval: Math.max(2300, 3900 - (wave - 1) * 180),
+      damage: Math.min(13, 8 + Math.floor((wave - 1) / 2)),
+      aimSpread: Math.max(0.055, 0.15 - (wave - 1) * 0.01)
+    },
+    [GAME_MODES.BOSS]: { hp: 26, fireInterval: 3000, damage: 9, aimSpread: 0.09 }
+  }[selectedMode] || { hp: 18, fireInterval: 4300, damage: 7, aimSpread: 0.15 };
+
+  if (type === 'boss') {
+    return {
+      hp: selectedMode === GAME_MODES.SURVIVAL ? difficulty.hp * 2 : 76,
+      fireInterval: Math.max(1800, difficulty.fireInterval * 0.72),
+      damage: Math.min(16, difficulty.damage + 3),
+      aimSpread: Math.max(0.04, difficulty.aimSpread * 0.65)
+    };
+  }
+  return difficulty;
 }
 
 function updateEnemies(dt) {
@@ -2699,11 +3061,17 @@ function fireEnemySalvo(enemy) {
     shell.position.copy(enemy.position).setY(enemy.position.y + 24).add(new THREE.Vector3(s, 0, 0));
 
     const dir = new THREE.Vector3().subVectors(carrierShip.position, enemy.position).normalize();
-    dir.x += (Math.random() - 0.5) * 0.16;
-    dir.z += (Math.random() - 0.5) * 0.16;
+    const spread = enemy.userData.aimSpread || 0.15;
+    dir.x += (Math.random() - 0.5) * spread;
+    dir.z += (Math.random() - 0.5) * spread;
     dir.normalize();
 
-    shell.userData = { vel: dir.multiplyScalar(24), gravity: -0.05, life: 190 };
+    shell.userData = {
+      vel: dir.multiplyScalar(24),
+      gravity: -0.05,
+      life: 190,
+      damage: enemy.userData.attackDamage || 7
+    };
     scene.add(shell);
     enemyProjectiles.push(shell);
   }
@@ -2730,8 +3098,8 @@ function initEngine() {
   scene.fog = new THREE.FogExp2(0x88aacc, 0.00007);
   camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 95000);
 
-  const hemiLight = new THREE.HemisphereLight(0xeef6ff, 0x1a3344, 2.2);
-  scene.add(hemiLight);
+  hemisphereLight = new THREE.HemisphereLight(0xeef6ff, 0x1a3344, 2.2);
+  scene.add(hemisphereLight);
 
   sunLight = new THREE.DirectionalLight(0xfff7e6, 2.8);
   sunLight.position.set(2200, 2600, 1400);
@@ -2769,6 +3137,7 @@ function initEngine() {
   });
   water.rotation.x = -Math.PI / 2;
   scene.add(water);
+  applyTimeOfDay();
 
   buildIslands();
   buildBeacon();
@@ -2779,8 +3148,58 @@ function initEngine() {
   setupMobileTouch();
   setupUIEvents();
   window.addEventListener('resize', onResize);
+  if (window.visualViewport) window.visualViewport.addEventListener('resize', onResize);
 
   animate();
+}
+
+function updateSceneFilters() {
+  nightVisionEnabled = timeOfDay === 2;
+  document.body.classList.toggle('night-vision-active', nightVisionEnabled);
+  if (!renderer || !renderer.domElement) return;
+  renderer.domElement.style.filter = isDroneFPV
+    ? 'grayscale(100%) contrast(180%) brightness(1.15)'
+    : nightVisionEnabled
+      ? 'grayscale(100%) sepia(100%) hue-rotate(70deg) saturate(320%) contrast(125%) brightness(78%)'
+      : '';
+}
+
+function applyTimeOfDay() {
+  const timeButton = document.getElementById('btn-time-toggle');
+  if (!sunLight || !hemisphereLight || !water) return;
+
+  if (timeOfDay === 0) {
+    if (timeButton) timeButton.textContent = '☀️ DAYLIGHT';
+    sunLight.intensity = 2.8;
+    sunLight.color.setHex(0xfff7e6);
+    hemisphereLight.intensity = 2.2;
+    hemisphereLight.color.setHex(0xeef6ff);
+    hemisphereLight.groundColor.setHex(0x1a3344);
+    scene.fog.color.setHex(0x88aacc);
+    water.material.uniforms['sunColor'].value.setHex(0xffffff);
+    water.material.uniforms['waterColor'].value.setHex(0x001a1f);
+  } else if (timeOfDay === 1) {
+    if (timeButton) timeButton.textContent = '🌅 SUNSET';
+    sunLight.intensity = 1.8;
+    sunLight.color.setHex(0xffb18a);
+    hemisphereLight.intensity = 1.5;
+    hemisphereLight.color.setHex(0xffd0a6);
+    hemisphereLight.groundColor.setHex(0x30202a);
+    scene.fog.color.setHex(0x9b655c);
+    water.material.uniforms['sunColor'].value.setHex(0xff7722);
+    water.material.uniforms['waterColor'].value.setHex(0x24110a);
+  } else {
+    if (timeButton) timeButton.textContent = '🌙 NIGHT VISION';
+    sunLight.intensity = 0.3;
+    sunLight.color.setHex(0x80b890);
+    hemisphereLight.intensity = 0.65;
+    hemisphereLight.color.setHex(0x8dbd98);
+    hemisphereLight.groundColor.setHex(0x06110a);
+    scene.fog.color.setHex(0x08130d);
+    water.material.uniforms['sunColor'].value.setHex(0x32894b);
+    water.material.uniforms['waterColor'].value.setHex(0x000b04);
+  }
+  updateSceneFilters();
 }
 
 /* ============================================================
@@ -3000,6 +3419,7 @@ function triggerHitmarker() {
 
 /* --- WEAPON 1: Continuous Gunfire Salvo with 10-Second Autoloader Reload --- */
 const MAX_GUN_AMMO = 24;
+const GUN_FIRE_INTERVAL_MS = 650;
 let gunAmmo = MAX_GUN_AMMO;
 let isGunReloading = false;
 let gunReloadTimer = null;
@@ -3106,7 +3526,7 @@ function startContinuousGunfire() {
       return;
     }
     fireSingleGunSalvo();
-  }, 115);
+  }, GUN_FIRE_INTERVAL_MS);
 }
 
 function stopContinuousGunfire() {
@@ -3282,7 +3702,6 @@ function firePlayerMissile() {
 }
 
 /* --- WEAPON 3: Controllable FPV Kamikaze Drone (Loitering Munition) --- */
-let isDroneFPV = false;
 let droneCamMode = 'top'; // 'top' (overhead 85° birds-eye) or 'angled' (angled 55° dive)
 let isDroneDivingFast = false;
 let fpvDroneMesh = null;
@@ -3377,10 +3796,7 @@ function launchDroneFPV() {
   const overlay = document.getElementById('drone-fpv-overlay');
   if (overlay) overlay.classList.remove('hidden');
 
-  // Apply Black & White / FLIR Thermal filter to 3D renderer canvas
-  if (renderer && renderer.domElement) {
-    renderer.domElement.style.filter = 'grayscale(100%) contrast(180%) brightness(1.15)';
-  }
+  updateSceneFilters();
 
   // Create FPV Drone 3D Mesh in the sky
   fpvDroneMesh = createFPVDroneMesh();
@@ -3441,10 +3857,7 @@ function cleanupDroneFPV() {
   const overlay = document.getElementById('drone-fpv-overlay');
   if (overlay) overlay.classList.add('hidden');
 
-  // Restore renderer canvas filter to normal color
-  if (renderer && renderer.domElement) {
-    renderer.domElement.style.filter = '';
-  }
+  updateSceneFilters();
 
   if (fpvDroneMesh) {
     scene.remove(fpvDroneMesh);
@@ -3765,7 +4178,7 @@ function updateProjectiles(dt) {
     if (p.position.distanceTo(carrierShip.position) < 240) {
       spawnExplosion(p.position.clone(), 1.8, 0xff2200);
       sfx.playExplosion(false);
-      damagePlayer(p.userData.type === 'torpedo' ? 14 : 7);
+      damagePlayer(p.userData.damage || (p.userData.type === 'torpedo' ? 14 : 7));
       scene.remove(p);
       enemyProjectiles.splice(i, 1);
       continue;
@@ -4294,7 +4707,7 @@ function setupMobileTouch() {
   window.addEventListener('touchcancel', endCameraTouch);
 
   window.addEventListener('mousedown', e => {
-    if (e.target.closest('#mobile-controls, .icon-btn, .screen-action-btn, #zoom-touch-bar, .overlay-screen, .enemy-hp-plate')) return;
+    if (e.target.closest('.tactical-btn, .joystick-zone, .helm-control-grp, .weapons-trigger-grp, .radar-box, .icon-btn, .screen-action-btn, #zoom-touch-bar, .overlay-screen, .enemy-hp-plate, .drone-ctrl-btn')) return;
     isDraggingCam = true;
     px = e.clientX; py = e.clientY;
   });
@@ -4441,25 +4854,41 @@ function setupUIEvents() {
   document.getElementById('radar-box').onclick = cycleTarget;
   document.getElementById('target-lock-box').onclick = cycleTarget;
 
-  document.getElementById('btn-deploy-combat').onclick = startCombatSession;
+  const deployBtn = document.getElementById('btn-deploy-combat');
+  if (deployBtn) deployBtn.onclick = startCombatSession;
 
-  document.getElementById('btn-quick-pause').onclick = () => setGameState(STATE.PAUSED);
-  document.getElementById('btn-resume').onclick = () => setGameState(STATE.PLAYING);
-  document.getElementById('btn-exit-lobby').onclick = () => setGameState(STATE.LOBBY);
-  document.getElementById('btn-redeploy').onclick = startCombatSession;
-  document.getElementById('btn-go-lobby').onclick = () => setGameState(STATE.LOBBY);
-  document.getElementById('btn-vic-lobby').onclick = () => setGameState(STATE.LOBBY);
-  document.getElementById('btn-next-mission').onclick = () => {
+  const quickPauseBtn = document.getElementById('btn-quick-pause');
+  if (quickPauseBtn) quickPauseBtn.onclick = () => setGameState(STATE.PAUSED);
+
+  const resumeBtn = document.getElementById('btn-resume');
+  if (resumeBtn) resumeBtn.onclick = () => setGameState(STATE.PLAYING);
+
+  const exitLobbyBtn = document.getElementById('btn-exit-lobby');
+  if (exitLobbyBtn) exitLobbyBtn.onclick = () => setGameState(STATE.LOBBY);
+
+  const redeployBtn = document.getElementById('btn-redeploy');
+  if (redeployBtn) redeployBtn.onclick = startCombatSession;
+
+  const goLobbyBtn = document.getElementById('btn-go-lobby');
+  if (goLobbyBtn) goLobbyBtn.onclick = () => setGameState(STATE.LOBBY);
+
+  const victoryLobbyBtn = document.getElementById('btn-vic-lobby');
+  if (victoryLobbyBtn) victoryLobbyBtn.onclick = () => setGameState(STATE.LOBBY);
+
+  const nextMissionBtn = document.getElementById('btn-next-mission');
+  if (nextMissionBtn) nextMissionBtn.onclick = () => {
     currentMissionIdx = (currentMissionIdx + 1) % MISSIONS.length;
     startCombatSession();
   };
 
-  document.getElementById('btn-audio-toggle').onclick = e => {
+  const audioToggleBtn = document.getElementById('btn-audio-toggle');
+  if (audioToggleBtn) audioToggleBtn.onclick = e => {
     sfx.enabled = !sfx.enabled;
     e.target.textContent = sfx.enabled ? "🔊 SFX: ON" : "🔇 SFX: OFF";
   };
 
-  document.getElementById('btn-fullscreen-toggle').onclick = () => {
+  const fullscreenBtn = document.getElementById('btn-fullscreen-toggle');
+  if (fullscreenBtn) fullscreenBtn.onclick = () => {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch(() => {});
     } else {
@@ -4467,22 +4896,10 @@ function setupUIEvents() {
     }
   };
 
-  let weatherIdx = 0;
-  document.getElementById('btn-time-toggle').onclick = e => {
-    weatherIdx = (weatherIdx + 1) % 3;
-    if (weatherIdx === 0) {
-      e.target.textContent = "☀️ DAYLIGHT";
-      sunLight.intensity = 2.8;
-      water.material.uniforms['sunColor'].value.setHex(0xffffff);
-    } else if (weatherIdx === 1) {
-      e.target.textContent = "🌅 SUNSET";
-      sunLight.intensity = 1.8;
-      water.material.uniforms['sunColor'].value.setHex(0xff7722);
-    } else {
-      e.target.textContent = "🌙 NIGHT";
-      sunLight.intensity = 0.55;
-      water.material.uniforms['sunColor'].value.setHex(0x224488);
-    }
+  const timeToggleBtn = document.getElementById('btn-time-toggle');
+  if (timeToggleBtn) timeToggleBtn.onclick = () => {
+    timeOfDay = (timeOfDay + 1) % 3;
+    applyTimeOfDay();
   };
 
   window.addEventListener('keydown', e => {
