@@ -477,6 +477,7 @@ canvas {
   border-color: #00ffaa;
   background: rgba(0, 40, 40, 0.45);
   box-shadow: 0 0 16px rgba(0, 255, 170, 0.3);
+  transform: translateY(-2px);
 }
 .mode-card.active::before {
   content: 'ACTIVE MISSION';
@@ -484,6 +485,12 @@ canvas {
   font-size: 8px; color: #00ffaa;
   letter-spacing: 0.12em;
   font-weight: 800;
+}
+.mode-card:focus-visible, .icon-btn:focus-visible, .deploy-btn:focus-visible,
+.hud-action-btn:focus-visible, .tactical-btn:focus-visible, .screen-action-btn:focus-visible,
+.lobby-nav-tab:focus-visible, .wpn-tab:focus-visible {
+  outline: 2px solid rgba(0, 229, 255, 0.9);
+  outline-offset: 2px;
 }
 .mode-icon {
   font-size: 24px;
@@ -1385,22 +1392,52 @@ canvas {
   top: 105px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(0, 15, 25, 0.88);
-  border: 1px solid #00e5ff;
+  background: linear-gradient(90deg, rgba(1, 25, 35, 0.9), rgba(0, 15, 25, 0.9));
+  border: 1px solid rgba(0, 229, 255, 0.7);
   color: #00e5ff;
   font-size: 11px;
-  font-weight: bold;
+  font-weight: 800;
   letter-spacing: 0.15em;
-  padding: 6px 16px;
-  border-radius: 4px;
+  padding: 7px 18px;
+  border-radius: 999px;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 0.3s;
+  transition: opacity 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
   z-index: 80;
+  box-shadow: 0 0 18px rgba(0, 229, 255, 0.25);
 }
 .combat-toast.visible {
   opacity: 1;
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow: 0 0 26px rgba(0, 229, 255, 0.4);
 }
+.hud-action-btn {
+  min-width: 48px;
+  min-height: 40px;
+  border: 1px solid rgba(0, 229, 255, 0.38);
+  background: rgba(2, 18, 32, 0.74);
+  color: #d9f8ff;
+  border-radius: 8px;
+  font-size: 7.5px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  box-shadow: inset 0 0 8px rgba(0, 229, 255, 0.08);
+}
+.hud-action-btn:hover,
+.hud-action-btn:active,
+.hud-action-btn.active {
+  transform: translateY(-1px);
+  border-color: #00e5ff;
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.25);
+  background: rgba(0, 229, 255, 0.13);
+}
+.tactical-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 18px rgba(0, 229, 255, 0.2);
+}
+
 
 .screen-action-btn {
   padding: 12px 32px;
@@ -4729,10 +4766,82 @@ function setupMobileTouch() {
   };
 }
 
+function setGraphicsMode(nextMode = 'low') {
+  const graphicsSelect = document.getElementById('graphics-select');
+  if (graphicsSelect) graphicsSelect.value = nextMode;
+  if (!renderer) return;
+
+  const maxRatio = nextMode === 'low' ? 1.2 : 1.9;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxRatio));
+  renderer.setSize(window.innerWidth, window.innerHeight);
+
+  const hudGfxBtn = document.getElementById('btn-hud-graphics');
+  if (hudGfxBtn) {
+    hudGfxBtn.textContent = nextMode === 'low' ? 'GFX: LOW' : 'GFX: HIGH';
+    hudGfxBtn.classList.toggle('active', nextMode === 'high');
+  }
+
+  showToast(nextMode === 'low' ? '🧭 GRAPHICS: LOW MODE' : '🎨 GRAPHICS: HIGH MODE');
+}
+
+function bindQuickHudActions() {
+  const quickExitBtn = document.getElementById('btn-quick-exit');
+  if (quickExitBtn) quickExitBtn.onclick = () => {
+    setGameState(STATE.LOBBY);
+    showToast('⚓ RETURNING TO COMMAND LOBBY');
+  };
+
+  const quickResetBtn = document.getElementById('btn-quick-reset');
+  if (quickResetBtn) quickResetBtn.onclick = () => {
+    startCombatSession();
+  };
+
+  const quickPauseBtn = document.getElementById('btn-quick-pause');
+  if (quickPauseBtn) quickPauseBtn.onclick = () => {
+    if (gameState === STATE.PLAYING) setGameState(STATE.PAUSED);
+  };
+
+  const hudAudioBtn = document.getElementById('btn-hud-audio');
+  if (hudAudioBtn) hudAudioBtn.onclick = () => {
+    sfx.enabled = !sfx.enabled;
+    hudAudioBtn.textContent = sfx.enabled ? 'SFX' : 'MUTE';
+    showToast(sfx.enabled ? '🔊 SOUND ENABLED' : '🔇 SOUND MUTED');
+  };
+
+  const hudGraphicsBtn = document.getElementById('btn-hud-graphics');
+  if (hudGraphicsBtn) {
+    hudGraphicsBtn.onclick = () => {
+      const graphicsSelect = document.getElementById('graphics-select');
+      const nextMode = graphicsSelect && graphicsSelect.value === 'low' ? 'high' : 'low';
+      setGraphicsMode(nextMode);
+    };
+  }
+
+  const nightVisionBtn = document.getElementById('btn-night-vision');
+  if (nightVisionBtn) {
+    nightVisionBtn.onclick = () => {
+      timeOfDay = (timeOfDay === 2 ? 0 : 2);
+      applyTimeOfDay();
+      nightVisionBtn.classList.toggle('active', timeOfDay === 2);
+      showToast(timeOfDay === 2 ? '🌙 NIGHT VISION ACTIVE' : '☀️ DAY MODE ACTIVE');
+    };
+  }
+}
+
 /* ============================================================
    15. UI EVENT LISTENERS
 ============================================================ */
 function setupUIEvents() {
+  bindQuickHudActions();
+
+  const graphicsSelect = document.getElementById('graphics-select');
+  if (graphicsSelect) {
+    graphicsSelect.addEventListener('change', () => {
+      const nextMode = graphicsSelect.value === 'low' ? 'low' : 'high';
+      setGraphicsMode(nextMode);
+    });
+  }
+
   // Scoreboard initial render
   Scoreboard.render();
 
