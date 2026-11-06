@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#030b14">
 <title>USS EISENHOWER (CVN-69) – NAVAL COMBAT SIMULATION</title>
+<script src="https://sdk.crazygames.com/crazygames-sdk-v2.js"></script>
 
 <style>
 /* ============================================================
@@ -3126,13 +3127,89 @@ function fireEnemySalvo(enemy) {
 /* ============================================================
    5. THREE.JS INITIALIZATION
 ============================================================ */
-initEngine();
+let crazyGamesSDKReady = false;
+
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    if (!window.CrazyGames?.SDK) {
+      throw new Error('CrazyGames SDK is unavailable.');
+    }
+    await window.CrazyGames.SDK.init();
+    crazyGamesSDKReady = true;
+  } catch (error) {
+    console.warn('CrazyGames SDK initialization failed; starting without SDK features.', error);
+  }
+  initEngine();
+}, { once: true });
+
+function notifyGameplayStart() {
+  if (!crazyGamesSDKReady) return;
+  try {
+    Promise.resolve(window.CrazyGames.SDK.game.gameplayStart())
+      .catch(error => console.warn('CrazyGames gameplayStart failed.', error));
+  } catch (error) {
+    console.warn('CrazyGames gameplayStart failed.', error);
+  }
+}
+
+function notifyGameplayStop() {
+  if (!crazyGamesSDKReady) return;
+  try {
+    Promise.resolve(window.CrazyGames.SDK.game.gameplayStop())
+      .catch(error => console.warn('CrazyGames gameplayStop failed.', error));
+  } catch (error) {
+    console.warn('CrazyGames gameplayStop failed.', error);
+  }
+}
+
+function requestMidgameAd() {
+  if (!crazyGamesSDKReady || !window.CrazyGames.SDK.ad?.requestAd) {
+    return Promise.resolve();
+  }
+
+  notifyGameplayStop();
+  return new Promise(resolve => {
+    let completed = false;
+    const finishAd = () => {
+      if (completed) return;
+      completed = true;
+      resolve();
+    };
+
+    try {
+      const adRequest = window.CrazyGames.SDK.ad.requestAd('midgame', {
+        adStarted: () => {},
+        adFinished: finishAd,
+        adError: error => {
+          console.warn('CrazyGames midgame ad failed.', error);
+          finishAd();
+        }
+      });
+      Promise.resolve(adRequest).catch(error => {
+        console.warn('CrazyGames midgame ad failed.', error);
+        finishAd();
+      });
+    } catch (error) {
+      console.warn('CrazyGames midgame ad failed.', error);
+      finishAd();
+    }
+  });
+}
+
+function getViewportSize() {
+  const viewport = window.visualViewport;
+  return {
+    width: viewport ? viewport.width : window.innerWidth,
+    height: viewport ? viewport.height : window.innerHeight
+  };
+}
 
 function initEngine() {
   const isMobileBrowser = window.matchMedia('(max-width: 760px)').matches || navigator.maxTouchPoints > 0;
+  const viewport = getViewportSize();
   renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, isMobileBrowser ? 1.25 : 1.75));
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(viewport.width, viewport.height);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 0.95;
   renderer.shadowMap.enabled = true;
@@ -3141,7 +3218,7 @@ function initEngine() {
 
   scene = new THREE.Scene();
   scene.fog = new THREE.FogExp2(0x88aacc, 0.00007);
-  camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 95000);
+  camera = new THREE.PerspectiveCamera(45, viewport.width / viewport.height, 1, 95000);
 
   hemisphereLight = new THREE.HemisphereLight(0xeef6ff, 0x1a3344, 2.2);
   scene.add(hemisphereLight);
@@ -4780,8 +4857,9 @@ function setGraphicsMode(nextMode = 'low') {
   if (!renderer) return;
 
   const maxRatio = nextMode === 'low' ? 1.2 : 1.9;
+  const viewport = getViewportSize();
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, maxRatio));
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(viewport.width, viewport.height);
 
   const hudGfxBtn = document.getElementById('btn-hud-graphics');
   if (hudGfxBtn) {
@@ -4993,7 +5071,8 @@ function setupUIEvents() {
   if (victoryLobbyBtn) victoryLobbyBtn.onclick = () => setGameState(STATE.LOBBY);
 
   const nextMissionBtn = document.getElementById('btn-next-mission');
-  if (nextMissionBtn) nextMissionBtn.onclick = () => {
+  if (nextMissionBtn) nextMissionBtn.onclick = async () => {
+    await requestMidgameAd();
     currentMissionIdx = (currentMissionIdx + 1) % MISSIONS.length;
     startCombatSession();
   };
@@ -5123,10 +5202,16 @@ function startCombatSession() {
 }
 
 function setGameState(s) {
+  const wasPlaying = gameState === STATE.PLAYING;
   if (s !== STATE.PLAYING && isDroneFPV) {
     cleanupDroneFPV();
   }
   gameState = s;
+  if (!wasPlaying && s === STATE.PLAYING) {
+    notifyGameplayStart();
+  } else if (wasPlaying && s !== STATE.PLAYING) {
+    notifyGameplayStop();
+  }
   if (s === STATE.LOBBY) {
     Scoreboard.render();
   }
@@ -5327,9 +5412,10 @@ function updateCamera() {
 }
 
 function onResize() {
-  camera.aspect = window.innerWidth / window.innerHeight;
+  const viewport = getViewportSize();
+  camera.aspect = viewport.width / viewport.height;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setSize(viewport.width, viewport.height);
 }
 </script>
 </body>
